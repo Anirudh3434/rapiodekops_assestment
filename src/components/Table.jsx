@@ -2,12 +2,12 @@ import React from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { confirmBooking, cancelBooking } from "../redux/bookingsSlice"
 import dayjs from "dayjs"
+import { Check, X } from "lucide-react"
 
 export const Table = () => {
   const dispatch = useDispatch()
   const { bookings, filters, pagination } = useSelector(state => state.bookings)
 
-  // Filter & search logic
   const filteredBookings = bookings
     .filter(b =>
       (filters.service === "All" || b.serviceName === filters.service) &&
@@ -23,13 +23,13 @@ export const Table = () => {
   const getStatusBadge = (status) => {
     switch (status) {
       case "Confirmed":
-        return "bg-green-500 text-white"
+        return "bg-green-200 text-green-800"
       case "Cancelled":
-        return "bg-red-500 text-white"
+        return "bg-red-200 text-red-800"
       case "Pending":
-        return "bg-yellow-400 text-black"
+        return "bg-yellow-200 text-yellow-900"
       default:
-        return "bg-gray-300"
+        return "bg-gray-200 text-gray-700"
     }
   }
 
@@ -46,35 +46,52 @@ export const Table = () => {
           </tr>
         </thead>
         <tbody>
-          {paginatedBookings.map(b => (
-            <tr
-              key={b.id}
-              className="text-sm md:text-base hover:bg-gray-50 transition-colors"
-            >
-              <td className="p-3 border-b">{b.userName}</td>
-              <td className="p-3 border-b">{b.serviceName}</td>
-              <td className="p-3 border-b">{dayjs(b.date).format("DD/MM/YYYY HH:mm")}</td>
-              <td className="p-3 border-b">
-                <span className={`px-2 py-1 rounded-full text-sm font-semibold ${getStatusBadge(b.status)}`}>
-                  {b.status}
-                </span>
-              </td>
-              <td className="p-3 border-b flex gap-2 justify-center flex-wrap">
-                <button
-                  onClick={() => dispatch(confirmBooking(b.id))}
-                  className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition"
-                >
-                  Confirm
-                </button>
-                <button
-                  onClick={() => dispatch(cancelBooking(b.id))}
-                  className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
-                >
-                  Cancel
-                </button>
-              </td>
-            </tr>
-          ))}
+          {paginatedBookings.map(b => {
+            const isConfirmed = b.status === "Confirmed"
+            const isCancelled = b.status === "Cancelled"
+
+            return (
+              <tr
+                key={b.id}
+                className="text-sm md:text-base hover:bg-gray-50 transition-colors"
+              >
+                <td className="p-3 border-b">{b.userName}</td>
+                <td className="p-3 border-b">{b.serviceName}</td>
+                <td className="p-3 border-b">{dayjs(b.date).format("DD/MM/YYYY HH:mm")}</td>
+                <td className="p-3 border-b">
+                  <span className={`px-2 py-1 rounded-full text-sm font-semibold ${getStatusBadge(b.status)}`}>
+                    {b.status}
+                  </span>
+                </td>
+                <td className="p-3 border-b flex gap-2 justify-center flex-wrap">
+                  <button
+                    onClick={() => dispatch(confirmBooking(b.id))}
+                    disabled={isConfirmed || isCancelled}
+                    className={`flex items-center gap-1 px-4 py-2 rounded-full font-semibold transition ${
+                      isConfirmed || isCancelled
+                        ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                        : "bg-green-100 text-green-800 hover:bg-green-200"
+                    }`}
+                  >
+                    <Check size={16} />
+                    Confirm
+                  </button>
+                  <button
+                    onClick={() => dispatch(cancelBooking(b.id))}
+                    disabled={isConfirmed || isCancelled}
+                    className={`flex items-center gap-1 px-4 py-2 rounded-full font-semibold transition ${
+                      isConfirmed || isCancelled
+                        ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                        : "bg-red-100 text-red-800 hover:bg-red-200"
+                    }`}
+                  >
+                    <X size={16} />
+                    Cancel
+                  </button>
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
 
